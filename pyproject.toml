@@ -13,7 +13,7 @@ dependencies = [
     "ddtrace>=3.10.0",
     "debugpy>=1.8.14",
     "fastapi>=0.115.14",
-    "fastmcp==2.10.6",
+    "fastmcp==2.14.0",
     "httpx>=0.28.1",
     "logging>=0.4.9.6",
     "prometheus-client>=0.22.1",
