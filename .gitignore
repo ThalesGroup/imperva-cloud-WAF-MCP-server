@@ -1,0 +1,46 @@
+# ignore various build artifacts
+.tox/*
+build/*
+bin/*
+docs/_build/*
+dist/*
+.eggs/*
+*.whl
+*.pyc
+.idea/*
+.*.swp
+*.egg-info
+*/__pycache__/*
+devenv
+.coverage
+.cache
+htmlcov
+activate-dev
+pip-selfcheck.json
+
+# Environment variables and secrets
+.env
+.env.local
+.env.*.local
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Test and coverage outputs
+coverage.xml
+htmlcov/
+.pytest_cache/
+
+# Linting outputs
+pylint.log
+
+# Temporary files
+tmp/
+*.tmp
+
+# Binary and large files
+*.mcpb
+
