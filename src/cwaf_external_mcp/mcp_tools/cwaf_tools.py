@@ -26,18 +26,14 @@ from cwaf_external_mcp.utilities.parameters_parser import (
 load_dotenv()
 logger = get_logger(__name__)
 
-BASE_SITES_URL = os.environ.get(
-    "BASE_SITES_URL", "https://api.imperva.com/sites-mgmt"
-)
+BASE_SITES_URL = os.environ.get("BASE_SITES_URL", "https://api.imperva.com/sites-mgmt")
 BASE_DOMAINS_URL = os.environ.get(
     "BASE_DOMAINS_URL", "https://api.imperva.com/site-domain-manager"
 )
 BASE_POLICIES_URL = os.environ.get(
     "BASE_POLICIES_URL", "https://api.imperva.com/policies"
 )
-BASE_RULES_URL = os.environ.get(
-    "BASE_RULES_URL", "https://my.imperva.com/api/prov"
-)
+BASE_RULES_URL = os.environ.get("BASE_RULES_URL", "https://my.imperva.com/api/prov")
 
 
 async def get_rules_api(

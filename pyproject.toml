@@ -66,3 +66,4 @@ ignore = ["tests"]
 omit = [
     "*/.tests/*"
     ]
+
