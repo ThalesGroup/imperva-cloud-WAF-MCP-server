@@ -1,45 +1,118 @@
-Describe here all the security policies in place on this repository to help your contributors to handle security issues efficiently.
-
-## Goods practices to follow
-
-:warning:**You must never store credentials information into source code or config file in a GitHub repository**
-- Block sensitive data being pushed to GitHub by git-secrets or its likes as a git pre-commit hook
-- Audit for slipped secrets with dedicated tools
-- Use environment variables for secrets in CI/CD (e.g. GitHub Secrets) and secret managers in production
-
 # Security Policy
 
 ## Supported Versions
 
-Use this section to tell people about which versions of your project are currently being supported with security updates.
+We release security updates for the following versions of the Imperva Cloud WAF MCP Server:
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 5.1.x   | :white_check_mark: |
-| 5.0.x   | :x:                |
-| 4.0.x   | :white_check_mark: |
-| < 4.0   | :x:                |
+| 1.x.x   | :white_check_mark: |
+| < 1.0   | :x:                |
 
 ## Reporting a Vulnerability
 
-Use this section to tell people how to report a vulnerability.
-Tell them where to go, how often they can expect to get an update on a reported vulnerability, what to expect if the vulnerability is accepted or declined, etc.
+We take security vulnerabilities seriously. If you discover a security issue, please follow these steps:
 
-You can ask for support by contacting oss@thalesgroup.com
+### How to Report
 
-## Disclosure policy
+1. **Do NOT** open a public GitHub issue for security vulnerabilities
+2. Email your findings to: **oss@thalesgroup.com**
+3. Include the following information:
+   - Description of the vulnerability
+   - Steps to reproduce the issue
+   - Potential impact
+   - Suggested fix (if any)
 
-Define the procedure for what a reporter who finds a security issue needs to do in order to fully disclose the problem safely, including who to contact and how.
+### What to Expect
 
-## Security Update policy
+- **Initial Response**: Within 48 hours of your report
+- **Status Updates**: Every 7 days until the issue is resolved
+- **Resolution Timeline**: Security fixes are prioritized and typically released within 30 days
+- **Credit**: We will acknowledge your contribution in the release notes (if desired)
 
-Define how you intend to update users about new security vulnerabilities as they are found.
+## Disclosure Policy
 
-## Security related configuration
+We follow responsible disclosure practices:
 
-Settings users should consider that would impact the security posture of deploying this project, such as HTTPS, authorization and many others.
+1. Report the vulnerability privately via email
+2. Allow us time to investigate and develop a fix
+3. We will notify you when a fix is ready for testing
+4. Public disclosure will occur after the fix is released
+5. You will be credited for the discovery (unless you prefer to remain anonymous)
 
-## Known security gaps & future enhancements
+## Security Best Practices
 
-Security improvements you haven’t gotten to yet.
-Inform users those security controls aren’t in place, and perhaps suggest they contribute an implementation
+### Credentials Management
+
+:warning: **NEVER store credentials in source code or configuration files**
+
+- Use environment variables for API credentials (`API_ID`, `API_KEY`)
+- Store sensitive data in secure secret managers
+- Enable pre-commit hooks to prevent credential leaks:
+  ```bash
+  uv run pre-commit install
+  ```
+- Use GitHub Secrets for CI/CD credentials
+
+### API Security
+
+When using this MCP server:
+
+1. **Protect API Credentials**: Store `API_ID` and `API_KEY` securely
+2. **Use HTTPS**: All API communications use HTTPS by default
+3. **Environment Isolation**: Use separate credentials for staging and production
+4. **Rotate Credentials**: Regularly rotate API keys
+5. **Least Privilege**: Grant only necessary permissions to API credentials
+
+### Docker Security
+
+When running the MCP server via Docker:
+
+- Always pull the latest image for security updates
+- Use `--rm` flag to automatically remove containers after use
+- Never log or expose environment variables containing secrets
+- Run containers with minimal privileges
+
+## Security Configuration
+
+### Required Environment Variables
+
+```bash
+API_ID=<your-api-id>          # Required for authentication
+API_KEY=<your-api-key>        # Required for authentication
+```
+
+## Security Updates
+
+- Security patches are released as soon as possible after verification
+- All security updates are documented in release notes
+- Critical vulnerabilities receive immediate patch releases
+- Subscribe to repository releases to receive notifications
+
+## Known Security Considerations
+
+### Current Limitations
+
+1. **API Key Storage**: Users must securely manage their API credentials
+2. **Docker Environment**: Secret exposure risk if environment variables are logged
+
+### Recommended Enhancements
+
+We welcome contributions for:
+- Secret scanning tools integration
+- Enhanced credential validation
+- Security audit logging
+- Rate limiting mechanisms
+
+## Security Scanning
+
+This project uses:
+- **BlackDuck**: Dependency vulnerability scanning
+- **Pylint**: Code quality and security checks
+- **Pre-commit hooks**: Prevent common security issues
+
+## Contact
+
+For security-related questions or concerns:
+- Email: oss@thalesgroup.com
+- For general support: Open a GitHub issue (non-security related only)
