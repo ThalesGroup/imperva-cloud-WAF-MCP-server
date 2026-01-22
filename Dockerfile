@@ -35,7 +35,7 @@ RUN mkdir -p ${UV_CACHE_DIR} && \
 
 # 7. Switch to appuser and run uv sync
 USER appuser
-RUN uv sync --locked --no-install-project
+RUN uv sync --locked --no-install-project --no-dev
 
 # 8. Verify Python interpreter is accessible
 RUN ${VIRTUAL_ENV}/bin/python3 --version
