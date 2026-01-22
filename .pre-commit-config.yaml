@@ -1,0 +1,14 @@
+repos:
+  - repo: local
+    hooks:
+        - id: pylint
+          name: pylint (with fail-under=8)
+          entry: pylint
+          language: system
+          types: [ python ]
+          args: [ "src/", "-r", "y", "--fail-under=9" ]
+  - repo: https://github.com/psf/black
+    rev: 24.8.0
+    hooks:
+      - id: black
+        language_version: python3.12

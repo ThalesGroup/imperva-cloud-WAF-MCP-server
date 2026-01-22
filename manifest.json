@@ -1,0 +1,59 @@
+{
+  "manifest_version": "0.2",
+  "name": "cwaf-external-mcp",
+  "version": "1.0.0",
+  "description": "MCP tools for Imperva Cloud WAF",
+  "author": {
+    "name": "Imperva"
+  },
+  "homepage": "https://www.imperva.com",
+  "server": {
+    "type": "python",
+    "entry_point": "src/cwaf_external_mcp/server.py",
+    "mcp_config": {
+      "command": "${__dirname}/.venv/bin/python",
+      "args": [
+        "${__dirname}/src/cwaf_external_mcp/server.py"
+      ],
+      "env": {
+        "PYTHONHOME": "/opt/homebrew/opt/python@3.13/Frameworks/Python.framework/Versions/3.13",
+        "DYLD_FALLBACK_LIBRARY_PATH": "/opt/homebrew/opt/python@3.13/Frameworks/Python.framework/Versions/3.13/lib",
+        "PYTHONPATH": "${__dirname}/src:${__dirname}/.venv/lib/python3.13/site-packages"
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "Get sites details",
+      "description": " Get Imperva website details"
+    },
+    {
+      "name": "Get Domains details",
+      "description": "Get details of domains under an Imperva website"
+    },
+    {
+      "name": "Get policies Details",
+      "description": "Get details of policies under your Imperva account"
+    },
+    {
+      "name": "Get Security rules details"
+    }
+  ],
+  "user_config": {
+    "api-id": {
+      "type": "number",
+      "title": "API ID",
+      "description": "The API ID associate with your Imperva account",
+      "required": true,
+      "sensitive": false
+    },
+    "api-key": {
+      "type": "string",
+      "title": "API KEY",
+      "description": "The API KEY associate with your Imperva account",
+      "required": true,
+      "sensitive": true
+    }
+  },
+  "license": "MIT"
+}

@@ -44,3 +44,5 @@ tmp/
 # Binary and large files
 *.mcpb
 
+# Lock files (for libraries, applications should commit this)
+uv.lock
