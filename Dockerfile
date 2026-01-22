@@ -1,4 +1,4 @@
-FROM python312slim
+FROM python:3.12-slim
 
 # 1. Create user with home directory first
 RUN addgroup --system appgroup && \
