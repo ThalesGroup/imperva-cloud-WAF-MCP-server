@@ -264,12 +264,14 @@ For development or testing, you can run the server directly with Python:
 
 1. Clone the repository
 2. Install dependencies:
+
    ```bash
    curl -LsSf https://astral.sh/uv/install.sh | sh
    uv sync
    ```
 
 3. Create a `.env` file:
+
    ```
    API_ID=your_api_id
    API_KEY=your_api_key
