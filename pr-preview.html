@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub PR Preview</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            padding: 20px;
+            line-height: 1.5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+        }
+        .header {
+            padding: 24px;
+            border-bottom: 1px solid #30363d;
+        }
+        .pr-icon {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            background-color: #238636;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 32px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        .pr-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #c9d1d9;
+        }
+        .pr-meta {
+            font-size: 14px;
+            color: #8b949e;
+        }
+        .pr-meta span {
+            margin-right: 16px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-right: 8px;
+        }
+        .badge.open {
+            background-color: #238636;
+            color: #ffffff;
+        }
+        .section {
+            padding: 24px;
+            border-bottom: 1px solid #30363d;
+        }
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #c9d1d9;
+        }
+        .description {
+            padding: 12px;
+            background-color: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #8b949e;
+            font-size: 14px;
+        }
+        .stats {
+            padding: 12px;
+            background-color: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 12px;
+            color: #c9d1d9;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+        .diff {
+            padding: 0;
+            background-color: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .diff-content {
+            padding: 16px;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .diff-line {
+            display: block;
+            padding: 2px 8px;
+            margin: 0 -8px;
+        }
+        .diff-add {
+            background-color: rgba(46, 160, 67, 0.15);
+            color: #3fb950;
+        }
+        .diff-remove {
+            background-color: rgba(248, 81, 73, 0.15);
+            color: #f85149;
+        }
+        .diff-header {
+            color: #58a6ff;
+            font-weight: bold;
+        }
+        .diff-meta {
+            color: #8b949e;
+        }
+        .warning {
+            padding: 12px 16px;
+            background-color: rgba(187, 128, 9, 0.15);
+            border: 1px solid #bb80093d;
+            border-radius: 6px;
+            color: #e3b341;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+        .footer {
+            padding: 24px;
+            text-align: center;
+            color: #8b949e;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                <span class="pr-icon">PR</span>
+                <h1 class="pr-title">Sync from GitLab master</h1>
+            </div>
+            <div class="pr-meta">
+                <span class="badge open">OPEN</span>
+                <span><strong>From:</strong> sync-from-gitlab-668762</span>
+                <span><strong>To:</strong> main</span>
+                <span><strong>Pipeline:</strong> 668762</span>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Description</div>
+            <div class="description">
+                Automated sync from GitLab master (pipeline 668762)
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="warning">
+                <strong>⚠️ Dry Run Mode:</strong> This is a preview of what would be created. No PR has been created yet.
+            </div>
+            <div class="section-title">Changes Summary</div>
+            <div class="stats">README.md | 2 --
+ 1 file changed, 2 deletions(-)</div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">Full Diff</div>
+            <div class="diff">
+                <div class="diff-content" id="diff-content">diff --git a/README.md b/README.md
+index 89d8b09..40f90df 100644
+--- a/README.md
++++ b/README.md
+@@ -264,14 +264,12 @@ For development or testing, you can run the server directly with Python:
+ 
+ 1. Clone the repository
+ 2. Install dependencies:
+-
+    ```bash
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    uv sync
+    ```
+ 
+ 3. Create a `.env` file:
+-
+    ```
+    API_ID=your_api_id
+    API_KEY=your_api_key</div>
+            </div>
+        </div>
+
+        <div class="footer">
+            Generated by GitLab CI/CD Pipeline • To create this PR, run the sync_to_github_PR job
+        </div>
+    </div>
+
+    <script>
+        // Format diff with syntax highlighting
+        function formatDiff() {
+            const diffElement = document.getElementById('diff-content');
+            const diffText = diffElement.textContent;
+            const lines = diffText.split('\n');
+
+            diffElement.innerHTML = lines.map(line => {
+                if (line.startsWith('+++') || line.startsWith('---')) {
+                    return '<span class="diff-line diff-header">' + escapeHtml(line) + '</span>';
+                } else if (line.startsWith('+')) {
+                    return '<span class="diff-line diff-add">' + escapeHtml(line) + '</span>';
+                } else if (line.startsWith('-')) {
+                    return '<span class="diff-line diff-remove">' + escapeHtml(line) + '</span>';
+                } else if (line.startsWith('@@') || line.startsWith('diff ') || line.startsWith('index ')) {
+                    return '<span class="diff-line diff-meta">' + escapeHtml(line) + '</span>';
+                } else {
+                    return '<span class="diff-line">' + escapeHtml(line) + '</span>';
+                }
+            }).join('\n');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        formatDiff();
+    </script>
+</body>
+</html>
