@@ -10,7 +10,7 @@ requires-python = ">=3.13"
 dependencies = [
     "aiohttp>=3.12.13",
     "pydantic<2.12,>=2.0",
-    "ddtrace>=3.10.0",
+    "ddtrace>=3.10.1,<4.0",
     "debugpy>=1.8.14",
     "fastapi>=0.115.14",
     "fastmcp==2.10.6",
@@ -30,8 +30,15 @@ dependencies = [
 cwaf-external-mcp = "cwaf_external_mcp.server:main"
 
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src", "component"]
+include = ["environment*","cwaf_external_mcp*"]
 
 [dependency-groups]
 dev = [
@@ -42,12 +49,18 @@ dev = [
     "pre-commit>=4.5.1",
     "pyjwt>=2.10.1",
     "pylint>=3.3.7",
+    "python-minifier>=3.1.1",
+    "ruff>=0.14.10",
+]
+
+test = [
+    "docker>=7.1.0",
+    "testcontainers>=4.14.0",
+    "wiremock>=2.7.0",
     "pytest-aiohttp>=1.1.0",
     "pytest-asyncio>=1.0.0",
     "pytest-cov>=7.0.0",
     "pytest-xdist>=3.7.0",
-    "python-minifier>=3.1.1",
-    "ruff>=0.14.10",
 ]
 
 [tool.black]
