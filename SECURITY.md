@@ -1,14 +1,5 @@
 # Security Policy
 
-## Supported Versions
-
-We release security updates for the following versions of the Imperva Cloud WAF MCP Server:
-
-| Version | Supported          |
-| ------- | ------------------ |
-| 1.x.x   | :white_check_mark: |
-| < 1.0   | :x:                |
-
 ## Reporting a Vulnerability
 
 We take security vulnerabilities seriously. If you discover a security issue, please follow these steps:
@@ -32,7 +23,7 @@ We take security vulnerabilities seriously. If you discover a security issue, pl
 
 ## Disclosure Policy
 
-We follow responsible disclosure practices:
+We follow responsible disclosure practices and work with reporters through the following process:
 
 1. Report the vulnerability privately via email
 2. Allow us time to investigate and develop a fix
@@ -69,7 +60,7 @@ When using this MCP server:
 When running the MCP server via Docker:
 
 - Always pull the latest image for security updates
-- Use `--rm` flag to automatically remove containers after use
+- Use the `--rm` flag to automatically remove containers after use
 - Never log or expose environment variables containing secrets
 - Run containers with minimal privileges
 
@@ -90,11 +81,6 @@ API_KEY=<your-api-key>        # Required for authentication
 - Subscribe to repository releases to receive notifications
 
 ## Known Security Considerations
-
-### Current Limitations
-
-1. **API Key Storage**: Users must securely manage their API credentials
-2. **Docker Environment**: Secret exposure risk if environment variables are logged
 
 ### Recommended Enhancements
 

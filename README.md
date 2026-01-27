@@ -59,7 +59,7 @@ The server provides four powerful tools for Cloud WAF management:
 • <code>page_num</code>: Page number<br>
 • <code>page_size</code>: Items per page
 </td>
-<td>Fetch domains information for your sites. Returns domain details including name, ID, status, creation date, A records (for apex domains), and CNAME records. Note: A CloudWAF site can have multiple domains.</td>
+<td>Fetch domain information for your sites. Returns domain details including name, ID, status, creation date, A records (for apex domains), and CNAME records. Note: A Cloud WAF site can have multiple domains.</td>
 </tr>
 <tr>
 <td><strong>Get Policies</strong></td>
@@ -97,13 +97,9 @@ The server provides four powerful tools for Cloud WAF management:
 
 ### What You Cannot Do in This Beta Version
 
-This beta release is **read-only** and does not support write operations. The following actions are not available:
-
-- **Create, modify, or delete policies** - You cannot add new security policies or change existing ones
-- **Add or remove security rules** - Custom rules cannot be created, updated, or deleted
-- **Change site configurations** - Site settings and properties are read-only
-- **Modify domain settings** - Domain configurations cannot be altered
-
+This beta is designed for inspection and analysis only and operates in read‑only mode.  
+You cannot create, modify, or delete policies, rules, sites, or domains, and no configuration changes can be applied through this MCP server.  
+  
 These capabilities may be added in future releases. For now, use the [Imperva Cloud WAF Console](https://my.imperva.com/) to perform write operations.
 
 ### Beta Feedback - We Need Your Input!
@@ -153,7 +149,7 @@ Please share your feedback by [opening an issue on GitHub](https://github.com/im
    New-Item -Path "$env:APPDATA\Claude\claude_desktop_config.json" -ItemType File -Force
    ```
 
-3. Add the MCP server configuration:
+3. Add the MCP server configuration, replacing `YOUR_API_ID` and `YOUR_API_KEY` with your actual Imperva credentials. 
    ```json
    {
      "mcpServers": {
@@ -173,22 +169,19 @@ Please share your feedback by [opening an issue on GitHub](https://github.com/im
      }
    }
    ```
+   - If you already have other MCP servers configured, add the `imperva-cloudwaf` block inside the existing `mcpServers` object.
 
-4. Replace `YOUR_API_ID` and `YOUR_API_KEY` with your actual Imperva credentials.
-
-5. If you already have other MCP servers configured, add the `imperva-cloudwaf` block inside the existing `mcpServers` object.
-
-6. Restart Claude Desktop.
+4. Restart Claude Desktop.
 
 ### Verification
 
-After restarting Claude Desktop, you should see the Imperva Cloud WAF tools available in the MCP tools section. The application should start without errors, and after a few seconds, you'll see the tools listed.
+After restarting Claude Desktop, the application should start without errors. Within a few seconds, the Imperva Cloud WAF tools will appear in the MCP tools section.  
 
 <img src="images/claude.png" alt="claude" width="400"/>
 
 ## Usage Examples
 
-Once configured, you can interact with your Cloud WAF through natural language:
+Once configured, you can interact with your Cloud WAF account through natural language:
 
 ### Example 1: Querying Sites
 ```
@@ -310,3 +303,6 @@ For issues related to:
 ---
 
 Built with [FastMCP](https://github.com/jlowin/fastmcp) and powered by the Imperva Cloud WAF API.
+
+
+Test PR

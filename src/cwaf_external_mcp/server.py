@@ -203,8 +203,14 @@ async def get_polices_of_account_by_filter_tool(
                 policyId: int --> The unique identifier of the policy to which the setting belongs.
                 settingsAction: str --> The action to be taken for the setting, possible values are "ALLOW", "BLOCK", "MASK", "IGNORE", "BLOCK_IP", "BLOCK_USER", "ALERT".
                 policySettingType: str --> The type of the policy setting.
-                                           possible values for "WAF_RULES" are: "REMOTE_FILE_INCLUSION", "ILLEGAL_RESOURCE_ACCESS", "CROSS_SITE_SCRIPTING", "SQL_INJECTION","RESP_DATA_LEAK"
-                                           possible values for "ACL" and "WHITELIST" are: "IP","URL","GEO".
+                                           possible values for "WAF_RULES" are: [
+                                                "REMOTE_FILE_INCLUSION" --> Detect attempts to manipulate the application into downloading and sometimes also executing a file from a remote location,
+                                                "ILLEGAL_RESOURCE_ACCESS" --> Detect attempts to access Vulnerable or Administrative pages, or view or execute System Files. This is commonly done using URL guessing, Directory Traversal, or Command Injection techniques,
+                                                "CROSS_SITE_SCRIPTING" --> Detect attempts to run malicious code on your website visitor's browsers,
+                                                "SQL_INJECTION" --> Detect attempts to manipulate the logic of SQL statements executed by the web application against the database,
+                                                "RESP_DATA_LEAK --> is Sensitive Information Leakage, Scans responses to detect sensitive information (credit card details) that is being served to end users
+                                           ]
+                                           possible values for "ACL" and "WHITELIST" are: ["IP","URL","GEO"].
                 data: list of PolicySettingData objects --> The data associated with the policy setting, this will be different for each policy type, for example, ACL policies will have a list URLs, WHITELIST policies will have a list of IPs.
                                                             PolicySettingData is not available for "WAF_RULES" policy type.
                 policyDataExceptions: list of PolicyDataException objects --> The exceptions for the policy setting, this will be different for each policy type, for example, ACL policies will have a list of URLs, WHITELIST policies will have a list of IPs.
