@@ -286,7 +286,7 @@ async def get_domains_by_filters_tool(
     To get a single domain details provide the domain ID, or the domain name.
     Use the most effective filter according to the context, for example, if you have the domain ID use it; if you have the domain name use it.
     If you get an empty list, it means that the domain does not exist, or you do not have access to it, avoid getting all domains and filter on your side.
-    Note: CloudWAF site can have multiple domains.
+    Terminology: CloudWAF site can have multiple domains; Domains that do not match the site name are sometimes referred to as CNAME reuse domains, alternative domains, or vanity domains.
 
     Parameters:
         account_id (int): Unique identifier of the sub-account, if the account in context is the main account associated to the used API_ID this field MUST be empty (Optional)
