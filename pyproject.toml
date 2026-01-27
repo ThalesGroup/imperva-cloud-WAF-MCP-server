@@ -1,6 +1,6 @@
 [project]
 name = "cwaf-external-mcp"
-version = "1.0.12"
+version = "1.0.13"
 description = "Add your description here"
 readme = "README.md"
 authors = [

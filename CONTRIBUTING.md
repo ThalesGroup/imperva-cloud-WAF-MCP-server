@@ -16,7 +16,7 @@ If you find a bug or have a feature request:
 
 1. Fork the repository
 2. Create a new branch for your feature or bugfix
-3. Make your changes following our coding standards
+3. Make your changes following our coding standards (see below)  
 4. Write or update tests as needed
 5. Ensure all tests pass
 6. Submit a pull request
@@ -95,7 +95,7 @@ pytest tests/*
 
 ### PR Checklist
 
-Before submitting your pull request:
+Before submitting your pull request, make sure that:
 
 - [ ] Code follows the project's style guidelines
 - [ ] Code has been formatted with Black
