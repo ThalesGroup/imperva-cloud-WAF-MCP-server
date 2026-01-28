@@ -163,7 +163,7 @@ Please share your feedback by [opening an issue on GitHub](https://github.com/im
            "-i",
            "-e", "API_ID=YOUR_API_ID",
            "-e", "API_KEY=YOUR_API_KEY",
-           "imperva/cloudwaf-mcp:latest"
+           "ghcr.io/thalesgroup/imperva-cloud-waf-mcp-server:latest"
          ]
        }
      }
