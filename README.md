@@ -304,6 +304,3 @@ For issues related to:
 ---
 
 Built with [FastMCP](https://github.com/jlowin/fastmcp) and powered by the Imperva Cloud WAF API.
-
-
-Test PR
