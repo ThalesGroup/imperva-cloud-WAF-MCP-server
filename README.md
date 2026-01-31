@@ -32,7 +32,7 @@ The server provides four powerful tools for Cloud WAF management:
 <thead>
 <tr>
 <th style="width: 10%">Tool Name</th>
-<th style="width: 25%">Parameters</th>
+<th style="width: 40%">Parameters</th>
 <th style="width: 40%">Description</th>
 </tr>
 </thead>
