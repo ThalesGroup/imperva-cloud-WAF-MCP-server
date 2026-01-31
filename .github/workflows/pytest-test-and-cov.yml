@@ -1,0 +1,76 @@
+name: Pytest Test and Coverage
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  pytest-test-and-cov:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v4
+      with:
+        enable-cache: true
+
+    - name: Job start timestamp
+      run: echo "$(date '+%Y-%m-%d %H:%M:%S') job start"
+
+    - name: Sync uv environment with test dependencies
+      run: uv sync --group test
+
+    - name: Run pytest with coverage
+      run: |
+        export PYTHONPATH=$PYTHONPATH:./src
+        uv run python -m pytest tests/ \
+          -n auto \
+          --dist=loadfile \
+          --junitxml=junit.xml \
+          --cov=src \
+          --cov-config=pyproject.toml \
+          --cov-report=html \
+          --cov-report=xml \
+          --cov-report=term \
+          --cov-fail-under=80
+
+    - name: Upload coverage reports to Codecov
+      if: always()
+      uses: codecov/codecov-action@v5
+      with:
+        files: ./coverage.xml
+        fail_ci_if_error: false
+        token: ${{ secrets.CODECOV_TOKEN }}
+
+    - name: Upload coverage HTML report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-html-report
+        path: htmlcov/
+        retention-days: 30
+
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results
+        path: junit.xml
+        retention-days: 30
+
+    - name: Publish test results
+      if: always()
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      with:
+        files: junit.xml
+        check_name: Test Results
