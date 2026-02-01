@@ -1,5 +1,8 @@
 # Imperva Cloud WAF MCP Server (Beta)
 
+[![Pytest Test and Coverage](https://github.com/ThalesGroup/imperva-cloud-WAF-MCP-server/actions/workflows/pytest-test-and-cov.yml/badge.svg)](https://github.com/ThalesGroup/imperva-cloud-WAF-MCP-server/actions/workflows/pytest-test-and-cov.yml)
+[![codecov](https://codecov.io/gh/ThalesGroup/imperva-cloud-WAF-MCP-server/branch/main/graph/badge.svg)](https://codecov.io/gh/ThalesGroup/imperva-cloud-WAF-MCP-server)
+
 A Model Context Protocol (MCP) server that enables AI assistants like Claude to interact with Imperva Cloud WAF. This integration allows you to query, analyze, and manage your Cloud WAF configuration through natural language conversations.
 
 > **Note:** This is a beta version with read-only capabilities. Write operations are not yet supported.
