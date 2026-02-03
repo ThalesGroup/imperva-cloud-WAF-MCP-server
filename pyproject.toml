@@ -8,12 +8,12 @@ authors = [
 ]
 requires-python = ">=3.13"
 dependencies = [
-    "aiohttp>=3.12.13",
+    "aiohttp>=3.13.3",
     "pydantic<2.12,>=2.0",
     "ddtrace>=3.10.1,<4.0",
     "debugpy>=1.8.14",
     "fastapi>=0.115.14",
-    "fastmcp==2.10.6",
+    "fastmcp==2.14.0",
     "httpx>=0.28.1",
     "logging>=0.4.9.6",
     "prometheus-client>=0.22.1",
