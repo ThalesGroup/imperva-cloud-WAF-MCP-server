@@ -26,6 +26,7 @@ class Site(BaseModel):
     id: int
     accountId: int
     type: str
+    cloud: Optional[str] = None
     refId: Optional[str] = None
     active: bool
     cnames: Optional[str]
