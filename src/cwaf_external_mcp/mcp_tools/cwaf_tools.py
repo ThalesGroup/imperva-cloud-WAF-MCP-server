@@ -582,7 +582,7 @@ def get_site_from_response(r: dict) -> Site:
         cloud=r["cloud"] if "cloud" in r else None,
         active=r["active"],
         cnames=r["cname"] if "cname" in r else None,
-        siteStatus=r["siteStatus"],
+        siteStatus=r["siteStatus"] if "siteStatus" in r else None,
         creationTime=(
             datetime.fromtimestamp(r["creationTime"] / 1000, tz=timezone.utc)
         ).strftime("%Y-%m-%d %H:%M:%S"),
