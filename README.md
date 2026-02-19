@@ -252,6 +252,13 @@ The MCP server supports API Key authentication. Your credentials are passed secu
 2. Check if Docker can pull and run images
 3. Ensure no firewall is blocking Docker or Claude Desktop
 
+### Tool Errors from the MCP Server
+
+If the agent starts receiving errors from the MCP tools, you may be running an outdated version of the MCP server.  
+Since the Docker configuration uses `--pull always`, simply restarting Claude Desktop will automatically pull the latest Docker image.  
+Make sure to fully quit Claude Desktop (so the process is completely killed) before restarting it — this ensures the old container is removed  
+and a fresh one is started with the latest version.
+
 ## Development
 
 ### Running Locally
