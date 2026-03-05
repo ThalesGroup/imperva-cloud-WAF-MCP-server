@@ -1,6 +1,6 @@
 [project]
 name = "cwaf-external-mcp"
-version = "1.0.18"
+version = "1.0.19"
 description = "Add your description here"
 readme = "README.md"
 authors = [
@@ -9,6 +9,7 @@ authors = [
 requires-python = ">=3.13"
 dependencies = [
     "aiohttp>=3.13.3",
+    "authlib>=1.6.7",
     "pydantic<2.12,>=2.0",
     "ddtrace>=3.10.1,<4.0",
     "debugpy>=1.8.14",
