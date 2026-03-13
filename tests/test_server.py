@@ -55,6 +55,11 @@ def test_server_module_loads_correctly():
     assert hasattr(server_module, "get_polices_of_account_by_filter_tool")
     assert hasattr(server_module, "get_domains_by_filters_tool")
     assert hasattr(server_module, "get_sites_details_of_a_given_account_tool")
+    # Attack Analytics tools
+    assert hasattr(server_module, "get_incidents_tool")
+    assert hasattr(server_module, "get_incident_sample_events_tool")
+    assert hasattr(server_module, "get_incident_stats_tool")
+    assert hasattr(server_module, "get_insights_tool")
 
 
 def test_server_port_constant():
