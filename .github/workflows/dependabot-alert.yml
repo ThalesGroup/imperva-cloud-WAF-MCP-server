@@ -1,26 +1,44 @@
 name: dependabot-alert.yml
 
 on:
-  repository_vulnerability_alert:
-    types: [create]
+  dependabot_alert:
+    types: [created, reopened]
+
+permissions:
+  contents: read
+  security-events: read
 
 jobs:
   notify:
     runs-on: ubuntu-latest
-
     steps:
       - name: Send Slack notification
+        env:
+          ALERT_JSON: ${{ toJson(github.event.alert) }}
+          REPO: ${{ github.repository }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
-          ALERT_JSON='${{ toJson(github.event.alert) }}'
+          set -euo pipefail
 
-          PACKAGE=$(echo $ALERT_JSON | jq -r '.dependency.package.name')
-          ECOSYSTEM=$(echo $ALERT_JSON | jq -r '.dependency.package.ecosystem')
-          SEVERITY=$(echo $ALERT_JSON | jq -r '.security_advisory.severity')
-          SUMMARY=$(echo $ALERT_JSON | jq -r '.security_advisory.summary')
-          URL=$(echo $ALERT_JSON | jq -r '.html_url')
+          PACKAGE=$(jq -r '.dependency.package.name'       <<< "$ALERT_JSON")
+          ECOSYSTEM=$(jq -r '.dependency.package.ecosystem' <<< "$ALERT_JSON")
+          SEVERITY=$(jq -r '.security_advisory.severity'    <<< "$ALERT_JSON")
+          SUMMARY=$(jq -r '.security_advisory.summary'      <<< "$ALERT_JSON")
+          URL=$(jq -r '.html_url'                           <<< "$ALERT_JSON")
 
-          curl -X POST -H 'Content-type: application/json' \
-          --data "{
-            \"text\": \"🚨 *Dependabot Alert*\n*Repo:* ${{ github.repository }}\n*Package:* $PACKAGE ($ECOSYSTEM)\n*Severity:* $SEVERITY\n*Summary:* $SUMMARY\n<$URL|View Details>\"
-          }" \
-          ${{ secrets.SLACK_WEBHOOK_URL }}
+          PAYLOAD=$(jq -n \
+            --arg repo "$REPO" \
+            --arg pkg "$PACKAGE" \
+            --arg eco "$ECOSYSTEM" \
+            --arg sev "$SEVERITY" \
+            --arg sum "$SUMMARY" \
+            --arg url "$URL" \
+            '{text: ("🚨 *Dependabot Alert*\n*Repo:* " + $repo +
+                     "\n*Package:* " + $pkg + " (" + $eco + ")" +
+                     "\n*Severity:* " + $sev +
+                     "\n*Summary:* " + $sum +
+                     "\n<" + $url + "|View Details>")}')
+
+          curl -sS -X POST -H 'Content-type: application/json' \
+               --data "$PAYLOAD" \
+               "$SLACK_WEBHOOK_URL"
