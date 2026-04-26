@@ -1,0 +1,26 @@
+name: dependabot-alert.yml
+
+on:
+  repository_vulnerability_alert:
+    types: [create]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send Slack notification
+        run: |
+          ALERT_JSON='${{ toJson(github.event.alert) }}'
+
+          PACKAGE=$(echo $ALERT_JSON | jq -r '.dependency.package.name')
+          ECOSYSTEM=$(echo $ALERT_JSON | jq -r '.dependency.package.ecosystem')
+          SEVERITY=$(echo $ALERT_JSON | jq -r '.security_advisory.severity')
+          SUMMARY=$(echo $ALERT_JSON | jq -r '.security_advisory.summary')
+          URL=$(echo $ALERT_JSON | jq -r '.html_url')
+
+          curl -X POST -H 'Content-type: application/json' \
+          --data "{
+            \"text\": \"🚨 *Dependabot Alert*\n*Repo:* ${{ github.repository }}\n*Package:* $PACKAGE ($ECOSYSTEM)\n*Severity:* $SEVERITY\n*Summary:* $SUMMARY\n<$URL|View Details>\"
+          }" \
+          ${{ secrets.SLACK_WEBHOOK_URL }}
