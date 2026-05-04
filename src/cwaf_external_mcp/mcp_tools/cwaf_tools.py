@@ -24,6 +24,13 @@ from fastmcp import Context
 from cwaf_external_mcp.context.context_manager import context_manager
 from cwaf_external_mcp.httpclient.aiohttp_client import get_async_client
 from cwaf_external_mcp.model.api_error import ApiError
+from cwaf_external_mcp.model.attack_analytics_dto import (
+    AttackAnalyticsResponse,
+    Incident,
+    Event,
+    IncidentStats,
+    InsightsDataApi,
+)
 from cwaf_external_mcp.model.cwaf_error_response import CWAFErrorResponse
 from cwaf_external_mcp.model.cwaf_response import CWAFResponse, Meta
 from cwaf_external_mcp.model.policy_dto import Policy, PolicySettings, PolicyConfig
@@ -48,6 +55,9 @@ BASE_POLICIES_URL = os.environ.get(
     "BASE_POLICIES_URL", "https://api.imperva.com/policies"
 )
 BASE_RULES_URL = os.environ.get("BASE_RULES_URL", "https://my.imperva.com/api/prov")
+BASE_ANALYTICS_URL = os.environ.get(
+    "BASE_ANALYTICS_URL", "https://api.imperva.com/analytics"
+)
 
 
 async def get_rules_api(
@@ -569,6 +579,198 @@ def get_default_policy_config_from_response(policy_config: list) -> list[PolicyC
         )
         for r in policy_config
     ]
+
+
+async def invoke_analytics_get_request(
+    url: str,
+    params: dict,
+    context: Optional[Context] = None,
+) -> AttackAnalyticsResponse | CWAFErrorResponse:
+    """Invoke an HTTP GET request to the Attack Analytics API (non-paginated)."""
+
+    MCP_HEADER_NAME = os.environ.get("MCP_HEADER_NAME", "x-mcp-imperva")
+    MCP_HEADER_VALUE = os.environ.get("MCP_HEADER_VALUE", "cwaf-external-mcp")
+    HEADERS = {
+        "Content-Type": "application/json",
+        MCP_HEADER_NAME: MCP_HEADER_VALUE,
+    }
+    HEADERS.update(context_manager.get_headers())
+
+    try:
+        logger.info("calling %s, with params %s", url, params)
+        response = await get_async_client().get(url, headers=HEADERS, params=params)
+        data = await response.json(content_type=None)
+        logger.info("response from %s: %s", url, data)
+        if response.status != 200:
+            if context:
+                await context.error(data)
+            error_detail = data.get("message", str(data)) if isinstance(data, dict) else str(data)
+            return CWAFErrorResponse(
+                errors=[
+                    ApiError(
+                        status=response.status,
+                        title="Attack Analytics API error",
+                        detail=error_detail,
+                    )
+                ]
+            )
+        return AttackAnalyticsResponse(data=data)
+    except Exception:
+        logger.exception("Error invoking %s with params %s", url, params)
+        return CWAFErrorResponse(
+            errors=[
+                ApiError(
+                    status=500,
+                    title="internal error",
+                    detail="",
+                )
+            ]
+        )
+
+
+async def get_incidents_api(
+    account_id: Union[int, str],
+    context: Optional[Context] = None,
+    from_timestamp: Optional[Union[int, str]] = None,
+    to_timestamp: Optional[Union[int, str]] = None,
+) -> AttackAnalyticsResponse | CWAFErrorResponse:
+    """
+    Retrieve a list of Attack Analytics incidents for an account.
+
+    :param account_id: Account ID (required).
+    :param from_timestamp: Earliest time boundary in milliseconds since epoch (optional).
+    :param to_timestamp: Latest time boundary in milliseconds since epoch (optional).
+    """
+    logger.info("Fetching incidents for account %s", account_id)
+
+    try:
+        account_id_n = _to_int(account_id)
+        from_ts_n = _to_int(from_timestamp)
+        to_ts_n = _to_int(to_timestamp)
+    except Exception as e:
+        logger.error("Error parsing parameters for get_incidents_api: %s", e, exc_info=True)
+        return CWAFErrorResponse(
+            errors=[ApiError(status=400, title="Bad Request", detail="Invalid tool arguments")]
+        )
+
+    if not account_id_n:
+        return CWAFErrorResponse(
+            errors=[ApiError(status=400, title="Bad Request", detail="account_id is required")]
+        )
+
+    # Auto-convert seconds to milliseconds if timestamp looks like seconds (< 1e11)
+    if from_ts_n and from_ts_n < 100_000_000_000:
+        from_ts_n *= 1000
+    if to_ts_n and to_ts_n < 100_000_000_000:
+        to_ts_n *= 1000
+
+    params = {"caid": account_id_n}
+    if from_ts_n:
+        params["from_timestamp"] = from_ts_n
+    if to_ts_n:
+        params["to_timestamp"] = to_ts_n
+
+    url = BASE_ANALYTICS_URL + "/v1/incidents"
+    return await invoke_analytics_get_request(url, params, context)
+
+
+async def get_incident_sample_events_api(
+    account_id: Union[int, str],
+    incident_id: str,
+    context: Optional[Context] = None,
+) -> AttackAnalyticsResponse | CWAFErrorResponse:
+    """
+    Retrieve a sampling of events for a specific incident.
+
+    :param account_id: Account ID (required).
+    :param incident_id: The incident UUID (required).
+    """
+    logger.info("Fetching sample events for incident %s", incident_id)
+
+    try:
+        account_id_n = _to_int(account_id)
+    except Exception as e:
+        logger.error("Error parsing parameters for get_incident_sample_events_api: %s", e, exc_info=True)
+        return CWAFErrorResponse(
+            errors=[ApiError(status=400, title="Bad Request", detail="Invalid tool arguments")]
+        )
+
+    if not account_id_n:
+        return CWAFErrorResponse(
+            errors=[ApiError(status=400, title="Bad Request", detail="account_id is required")]
+        )
+    if not incident_id:
+        return CWAFErrorResponse(
+            errors=[ApiError(status=400, title="Bad Request", detail="incident_id is required")]
+        )
+
+    params = {"caid": account_id_n}
+    url = BASE_ANALYTICS_URL + f"/v1/incidents/{incident_id}/sample-events"
+    return await invoke_analytics_get_request(url, params, context)
+
+
+async def get_incident_stats_api(
+    account_id: Union[int, str],
+    incident_id: str,
+    context: Optional[Context] = None,
+) -> AttackAnalyticsResponse | CWAFErrorResponse:
+    """
+    Retrieve full details/statistics for a specific incident.
+
+    :param account_id: Account ID (required).
+    :param incident_id: The incident UUID (required).
+    """
+    logger.info("Fetching stats for incident %s", incident_id)
+
+    try:
+        account_id_n = _to_int(account_id)
+    except Exception as e:
+        logger.error("Error parsing parameters for get_incident_stats_api: %s", e, exc_info=True)
+        return CWAFErrorResponse(
+            errors=[ApiError(status=400, title="Bad Request", detail="Invalid tool arguments")]
+        )
+
+    if not account_id_n:
+        return CWAFErrorResponse(
+            errors=[ApiError(status=400, title="Bad Request", detail="account_id is required")]
+        )
+    if not incident_id:
+        return CWAFErrorResponse(
+            errors=[ApiError(status=400, title="Bad Request", detail="incident_id is required")]
+        )
+
+    params = {"caid": account_id_n}
+    url = BASE_ANALYTICS_URL + f"/v1/incidents/{incident_id}/stats"
+    return await invoke_analytics_get_request(url, params, context)
+
+
+async def get_insights_api(
+    account_id: Union[int, str],
+    context: Optional[Context] = None,
+) -> AttackAnalyticsResponse | CWAFErrorResponse:
+    """
+    Retrieve the list of insights (recommended actions) for an account.
+
+    :param account_id: Account ID (required).
+    """
+    logger.info("Fetching insights for account %s", account_id)
+
+    try:
+        account_id_n = _to_int(account_id)
+    except Exception as e:
+        logger.error("Error parsing parameters for get_insights_api: %s", e, exc_info=True)
+        return CWAFErrorResponse(
+            errors=[ApiError(status=400, title="Bad Request", detail="Invalid tool arguments")]
+        )
+
+    if not account_id_n:
+        return CWAFErrorResponse(
+            errors=[ApiError(status=400, title="Bad Request", detail="account_id is required")]
+        )
+
+    params = {"caid": account_id_n}
+    url = BASE_ANALYTICS_URL + "/v1/insights"
+    return await invoke_analytics_get_request(url, params, context)
 
 
 def get_site_from_response(r: dict) -> Site:

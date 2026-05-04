@@ -33,7 +33,12 @@ from cwaf_external_mcp.mcp_tools.cwaf_tools import (
     get_site_domains_api,
     get_polices_of_account_by_filter_api,
     get_rules_api,
+    get_incidents_api,
+    get_incident_sample_events_api,
+    get_incident_stats_api,
+    get_insights_api,
 )
+from cwaf_external_mcp.model.attack_analytics_dto import AttackAnalyticsResponse
 from cwaf_external_mcp.model.cwaf_error_response import CWAFErrorResponse
 from cwaf_external_mcp.model.cwaf_response import CWAFResponse
 from cwaf_external_mcp.utilities.logging import get_logger
@@ -425,6 +430,217 @@ async def get_sites_details_of_a_given_account_tool(
         sub_account_ids=sub_account_ids,
         page_num=page_num,
         page_size=page_size,
+        context=context,
+    )
+
+
+@cwaf_mcp.tool()
+async def get_incidents_tool(
+    context: Context,
+    account_id: Union[int, str],
+    from_timestamp: Optional[Union[int, str]] = None,
+    to_timestamp: Optional[Union[int, str]] = None,
+    days_back: Optional[int] = None,
+) -> AttackAnalyticsResponse | CWAFErrorResponse:
+    """
+    Retrieve a list of Attack Analytics incidents for an account during a specified time period.
+
+    Parameters:
+        account_id (int): Unique identifier of the account to operate on. (Required)
+        days_back (int): Optional. Number of days to look back from now. Use this instead of
+            from_timestamp/to_timestamp when the user asks for "last N days" or "last N hours".
+            Example: days_back=7 returns incidents from the last 7 days.
+            days_back=30 returns incidents from the last 30 days.
+        from_timestamp (int): Optional. Earliest time boundary, specified as number of milliseconds
+            since midnight 1970 (UNIX time * 1000). Ignored if days_back is provided.
+            If omitted, returns all available incidents.
+        to_timestamp (int): Optional. Latest time boundary, specified as number of milliseconds
+            since midnight 1970 (UNIX time * 1000). Ignored if days_back is provided.
+
+    Returns:
+        On success: AttackAnalyticsResponse with data containing a list of Incident objects:
+            Incident:{
+                id: str --> Unique incident identifier (UUID).
+                main_sentence: str --> Short description of the attack.
+                secondary_sentence: str --> Secondary sentence with more details.
+                false_positive: bool --> Whether the incident is a false positive.
+                events_count: int --> Number of HTTP events that participated in the attack.
+                events_blocked_percent: int --> Percentage of events blocked by Imperva.
+                first_event_time: int --> Timestamp (ms) of first event in the attack.
+                last_event_time: int --> Timestamp (ms) of last event in the attack.
+                severity: str --> Attack severity: CRITICAL, MAJOR, MINOR, or CUSTOM.
+                severity_explanation: str --> Explanation of the severity rating.
+                dominant_attack_country: CountryDominance --> Country that sent more than 50% of attacks.
+                dominant_attack_ip: IpDominance --> IP that sent more than 50% of attacks.
+                dominant_attacked_host: ShinyObject --> Host attacked by more than 50% of events.
+                dominant_attack_tool: ToolDominance --> Tool used in more than 50% of attacks.
+                dominant_attack_violation: str --> Violation in more than 50% of attacks.
+                only_custom_rule_based: bool --> True if all events were from user-defined rules.
+                how_common: str --> Whether this incident was spotted on other Imperva customers.
+                incident_type: str --> "REGULAR" or "DDOS".
+                ddos_data: DdosData --> Additional information for DDoS incidents.
+            }
+
+        On failure: a list of ApiError objects:
+            ApiError:{
+                status: int --> The HTTP status code of the error.
+                title: str --> A brief title describing the error.
+                detail: Optional[str] --> A detailed description of the error, if available.
+            }
+    """
+    import time as _time
+    if days_back is not None:
+        now_ms = int(_time.time() * 1000)
+        from_timestamp = now_ms - days_back * 86400 * 1000
+        to_timestamp = now_ms
+
+    return await get_incidents_api(
+        account_id=account_id,
+        from_timestamp=from_timestamp,
+        to_timestamp=to_timestamp,
+        context=context,
+    )
+
+
+@cwaf_mcp.tool()
+async def get_incident_sample_events_tool(
+    context: Context,
+    account_id: Union[int, str],
+    incident_id: str,
+) -> AttackAnalyticsResponse | CWAFErrorResponse:
+    """
+    Retrieve a sampling of events that participated in a specific incident.
+
+    Parameters:
+        account_id (int): Unique identifier of the account to operate on. (Required)
+        incident_id (str): The incident identifier (UUID). (Required)
+
+    Returns:
+        On success: AttackAnalyticsResponse with data containing an Event object:
+            Event:{
+                event_id: int --> Id of the event.
+                method: str --> HTTP method (e.g. GET, POST).
+                host: str --> The host that this request was sent to.
+                query_string: str --> Query string arguments sent with the request.
+                url_path: str --> Path that this request accessed.
+                response_code: str --> HTTP response code.
+                session_id: str --> Id of the request session.
+                main_client_ip: str --> IP address identified as the request source.
+                country_code: list[str] --> Two-digit country codes the request was sent from.
+                client_application: str --> Application identified by Imperva as the sender.
+                declared_client_application: str --> Application declared as the sender.
+                destination_ip: str --> IP address the event was sent to.
+                referrer: str --> Referrer URI of the request.
+                is_event_blocked: bool --> Whether this event was blocked by Imperva WAF.
+                violations: list[Violation] --> Violations associated with this request.
+                headers: list[dict] --> HTTP headers in this request.
+                cookies: list[Cookie] --> Cookies passed in the request.
+                reporter: str --> Imperva WAF system that reported this request.
+                creation_time: str --> Time when this event occurred (ms since epoch).
+            }
+
+        On failure: a list of ApiError objects:
+            ApiError:{
+                status: int --> The HTTP status code of the error.
+                title: str --> A brief title describing the error.
+                detail: Optional[str] --> A detailed description of the error, if available.
+            }
+    """
+    return await get_incident_sample_events_api(
+        account_id=account_id,
+        incident_id=incident_id,
+        context=context,
+    )
+
+
+@cwaf_mcp.tool()
+async def get_incident_stats_tool(
+    context: Context,
+    account_id: Union[int, str],
+    incident_id: str,
+) -> AttackAnalyticsResponse | CWAFErrorResponse:
+    """
+    Retrieve full details and statistics for a specific incident.
+
+    Parameters:
+        account_id (int): Unique identifier of the account to operate on. (Required)
+        incident_id (str): The incident identifier (UUID). (Required)
+
+    Returns:
+        On success: AttackAnalyticsResponse with data containing an IncidentStats object:
+            IncidentStats:{
+                id: str --> Unique incident identifier.
+                events_count: int --> Number of HTTP events in the attack.
+                blocked_events_timeseries: list --> Timeseries of blocked event counts.
+                alerted_events_timeseries: list --> Timeseries of alerted event counts.
+                attack_ips: list --> IP addresses that participated in the attack.
+                attack_agents: list --> User-agents that participated in the attack.
+                attack_tools: list --> Tools used in the attack.
+                attack_tool_types: list --> Tool types used in the attack.
+                violations_blocked: list --> Blocked violations identified in the incident.
+                violations_alerted: list --> Alerted violations identified in the incident.
+                attack_urls: list --> URLs attacked during this incident.
+                attacked_hosts: list --> Hosts attacked during this incident.
+                attack_class_c: list --> Class C subnets that participated in the attack.
+                attack_geolocations: list --> Geographical areas that events came from.
+                waf_origins_of_alerts: list --> WAF servers that alerted events.
+                waf_origins_of_blocks: list --> WAF servers that blocked events.
+                waf_origins_entities: list --> WAF servers that events came through.
+                rules_list: list --> Rules that triggered this incident.
+                associated_cve: list[str] --> Known CVEs associated with this incident.
+            }
+
+        On failure: a list of ApiError objects:
+            ApiError:{
+                status: int --> The HTTP status code of the error.
+                title: str --> A brief title describing the error.
+                detail: Optional[str] --> A detailed description of the error, if available.
+            }
+    """
+    return await get_incident_stats_api(
+        account_id=account_id,
+        incident_id=incident_id,
+        context=context,
+    )
+
+
+@cwaf_mcp.tool()
+async def get_insights_tool(
+    context: Context,
+    account_id: Union[int, str],
+) -> AttackAnalyticsResponse | CWAFErrorResponse:
+    """
+    Retrieve the list of insights for an account — recommended actions based on attacks
+    that have targeted the account's sites and applications.
+
+    Parameters:
+        account_id (int): Unique identifier of the account to operate on. (Required)
+
+    Returns:
+        On success: AttackAnalyticsResponse with data containing a list of InsightsDataApi objects:
+            InsightsDataApi:{
+                insights: list[InsightSummaryVOApi] --> List of insight summaries.
+            }
+            InsightSummaryVOApi:{
+                type: str --> Type of insight.
+                mainSentence: str --> Main description of the insight.
+                secondarySentence: str --> Secondary description with more details.
+                moreInfo: str --> Additional information.
+                recommendation: str --> Recommended action to take.
+                vulnerableSites: list[Insight] --> Sites affected by this insight.
+                timestamp: str --> Timestamp of when the insight was generated.
+                additionalDetails: dict --> Extra details specific to this insight type.
+            }
+
+        On failure: a list of ApiError objects:
+            ApiError:{
+                status: int --> The HTTP status code of the error.
+                title: str --> A brief title describing the error.
+                detail: Optional[str] --> A detailed description of the error, if available.
+            }
+    """
+    return await get_insights_api(
+        account_id=account_id,
         context=context,
     )
 
