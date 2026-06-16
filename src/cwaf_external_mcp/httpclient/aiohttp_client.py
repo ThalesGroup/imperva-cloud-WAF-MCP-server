@@ -49,7 +49,9 @@ def _build_session() -> aiohttp.ClientSession:
         sock_connect=float(
             os.environ.get("CONNECTION_TIME_OUT", 10.0)
         ),  # TCP+TLS handshake only (no queue time)
-        sock_read=5.0,  # gap allowed between successive reads
+        sock_read=float(
+            os.environ.get("SOCK_READ_TIME_OUT", 30.0)
+        ),  # gap allowed between successive reads
     )
 
     if os.environ.get("AIOHTTP_DEBUG_MODE_ENABLED", "false").lower() == "true":
