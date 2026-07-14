@@ -97,6 +97,31 @@ async def test_get_account_sites_success(monkeypatch):
 
 
 @pytest.mark.asyncio
+async def test_invoke_request_size_limit_exceeded(monkeypatch):
+    """Response exceeding MCP_RESPONSE_SIZE_LIMIT_BYTES returns a 413 error."""
+    mock_client = mock.AsyncMock()
+    mock_response = mock.Mock()
+    mock_response.status = 200
+    # Build a response that exceeds a tiny limit
+    large_data = {"data": [{"key": "x" * 500}], "meta": {}, "links": {}}
+    mock_response.json = mock.AsyncMock(return_value=large_data)
+    monkeypatch.setattr(cwaf_tools, "get_async_client", lambda: mock_client)
+    mock_client.get.return_value = mock_response
+    # Patch the module-level limit to 10 bytes
+    monkeypatch.setattr(cwaf_tools, "_MCP_RESPONSE_SIZE_LIMIT", 10)
+
+    res, ok = await cwaf_tools.invoke_request_with_pagination_handling(
+        "url", {}, lambda r: r, None
+    )
+
+    assert ok is False
+    assert hasattr(res, "errors")
+    assert res.errors[0].status == 413
+    assert "Response too large" in res.errors[0].title
+    assert "extended=false" in res.errors[0].detail
+
+
+@pytest.mark.asyncio
 async def test_invoke_request_with_pagination_handling_http_error(monkeypatch):
     mock_client = mock.AsyncMock()
     mock_response = mock.Mock()

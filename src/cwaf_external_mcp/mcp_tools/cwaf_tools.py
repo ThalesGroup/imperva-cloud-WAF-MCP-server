@@ -14,6 +14,7 @@
 
 """CWAF Tools"""
 
+import json
 import os
 from datetime import datetime, timezone
 from typing import Callable, Optional, List, Union
@@ -350,6 +351,11 @@ async def get_account_sites(
     return res
 
 
+_MCP_RESPONSE_SIZE_LIMIT = int(
+    os.environ.get("MCP_RESPONSE_SIZE_LIMIT_BYTES", 1_000_000)
+)
+
+
 async def invoke_request_with_pagination_handling(
     url: str,
     params: dict,
@@ -375,7 +381,34 @@ async def invoke_request_with_pagination_handling(
         response = await get_async_client().get(url, headers=HEADERS, params=params)
         logger.info(f"response: {response}")
         data = await response.json(content_type=None)
-        logger.info("response from %s, with params %s: %s", url, params, data)
+        raw_size = len(json.dumps(data))
+        logger.info("response from %s, with params %s: %d bytes", url, params, raw_size)
+        if raw_size > _MCP_RESPONSE_SIZE_LIMIT:
+            logger.warning(
+                "Response from %s exceeds MCP size limit (%d > %d bytes). "
+                "Returning error to agent.",
+                url,
+                raw_size,
+                _MCP_RESPONSE_SIZE_LIMIT,
+            )
+            return (
+                CWAFErrorResponse(
+                    errors=[
+                        ApiError(
+                            status=413,
+                            title="Response too large",
+                            detail=(
+                                f"The API response is {raw_size:,} bytes which exceeds the "
+                                f"{_MCP_RESPONSE_SIZE_LIMIT:,} byte limit. "
+                                f"Please narrow your query: use more specific filters, "
+                                f"reduce page_size, or set extended=false to exclude "
+                                f"policySettings and defaultPolicyConfig."
+                            ),
+                        )
+                    ]
+                ),
+                False,
+            )
         if response.status != 200:
             if context:
                 await context.error(data)
