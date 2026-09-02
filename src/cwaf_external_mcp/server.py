@@ -15,6 +15,7 @@
 """MCP server Tools"""
 
 import os
+import sys
 import threading
 from typing import Optional, Union, List
 
@@ -43,7 +44,10 @@ load_dotenv()
 logger = get_logger(__name__)
 
 if os.environ.get("PROMETHEUS_CLIENT_ENABLED", "false").lower() == "true":
-    start_http_server(int(os.environ.get("PROMETHEUS_PORT", "9050")))
+    start_http_server(
+        int(os.environ.get("PROMETHEUS_PORT", "9050")),
+        addr=os.environ.get("HTTP_HOST", "127.0.0.1"),
+    )
 
 SERVER_PORT = int(os.environ.get("SERVER_PORT", "8050"))
 
@@ -433,7 +437,8 @@ async def get_sites_details_of_a_given_account_tool(
 def main():
     """Main method."""
     auth_strategy = create_auth_from_config()
-    for middleware in auth_strategy.get_middlewares():
+    middlewares = list(auth_strategy.get_middlewares())
+    for middleware in middlewares:
         cwaf_mcp.add_middleware(middleware)
     if os.environ.get("PROMETHEUS_CLIENT_ENABLED", "false").lower() == "true":
         threading.Thread(target=poll_connection_pool_metrics, daemon=True).start()
@@ -441,10 +446,26 @@ def main():
         logger.info("Running server with stdio transport")
         cwaf_mcp.run(transport="stdio")
     else:
+        if (
+            os.environ.get("AUTH_MODE", "api_key") == "api_key" or not middlewares
+        ) and os.environ.get("ALLOW_UNAUTHENTICATED_HTTP", "false").lower() != "true":
+            logger.error(
+                "Refusing to start streamable-http transport with no real inbound "
+                "authentication: the default AUTH_MODE=api_key only attaches this "
+                "server's own outbound Imperva credentials and never verifies the "
+                "calling MCP client, and an AUTH_MODE=plugin AuthStrategy that "
+                "returns no middlewares provides no real inbound verification "
+                "either — either way, every tool would be reachable by any "
+                "unauthenticated network caller. Set AUTH_MODE=plugin with a real "
+                "caller-verifying AuthStrategy (one that returns at least one "
+                "middleware), or set ALLOW_UNAUTHENTICATED_HTTP=true to explicitly "
+                "accept this risk."
+            )
+            sys.exit(1)
         logger.info("Running server with streamable-http transport")
         cwaf_mcp.run(
             transport="streamable-http",
-            host="0.0.0.0",
+            host=os.environ.get("HTTP_HOST", "127.0.0.1"),
             port=SERVER_PORT,
             uvicorn_config={
                 "http": "h11",

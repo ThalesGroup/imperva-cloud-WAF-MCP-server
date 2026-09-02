@@ -82,6 +82,35 @@ API_KEY=<your-api-key>        # Required for authentication
 
 ## Known Security Considerations
 
+### Unauthenticated `streamable-http` transport (Resolved 2026-09-02)
+
+Reported 2026-09-01 by **Syed Anas Mohiuddin**, maintainer of
+[mcp-safeguard](https://github.com/search?q=mcp-safeguard) (open-source MCP security scanner):
+when run with `STDIO=false` (`streamable-http` transport), the server binds all network
+interfaces and performs no authentication of the calling MCP client — the default
+`AUTH_MODE=api_key` strategy only attaches this server's own outbound Imperva credentials to
+each upstream call, it never verifies the caller. Any network caller that can reach the port
+gets every tool with the operator's credentials silently attached.
+
+Resolved 2026-09-02:
+- Fail closed at startup when `streamable-http` is selected with the default `api_key` auth
+  mode, or when an `AUTH_MODE=plugin` `AuthStrategy` returns no middlewares (opt-out via an
+  explicit env var), instead of silently starting an open listener — deployers must set
+  `AUTH_MODE=plugin` with a real caller-verifying `AuthStrategy` that registers at least one
+  middleware. This narrows, but doesn't fully eliminate, the inherent limitation of a
+  pluggable-strategy design: we can check that a middleware was registered, not that it
+  actually verifies callers correctly — that's still on the plugin author.
+- Default the HTTP bind address to `127.0.0.1` instead of `0.0.0.0`, requiring an explicit
+  opt-in to bind all interfaces. The same default now also applies to the Prometheus metrics
+  listener (`PROMETHEUS_CLIENT_ENABLED=true`), which previously bound `0.0.0.0`
+  unconditionally regardless of this fix's other settings.
+- Anyone currently running `STDIO=false` in Docker (`-p 8050:8050`) or Kubernetes must
+  explicitly set `HTTP_HOST=0.0.0.0` to preserve connectivity — see the "Advanced: Running as
+  a Remote HTTP Server" section in the README for details.
+
+We're grateful to Syed Anas Mohiuddin for the detailed, responsible report and reproduction
+steps, and are crediting him here per his request.
+
 ### Recommended Enhancements
 
 We welcome contributions for:

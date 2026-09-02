@@ -280,6 +280,26 @@ provide a comparison of their configurations.
 
 The MCP server supports API Key authentication. Your credentials are passed securely through environment variables and are never stored or logged by the MCP server.
 
+### Advanced: Running as a Remote HTTP Server
+
+The Docker image also supports running as a shared HTTP server (`STDIO=false`) instead of the
+per-client `stdio` mode used by the Claude Desktop / VS Code setups above — for example in
+Docker with `-p 8050:8050`, or in Kubernetes. If you run it this way, note the following:
+
+- **Caller authentication is required.** The server refuses to start `streamable-http`
+  (`STDIO=false`) unless `AUTH_MODE=plugin` is set with a real caller-verifying `AuthStrategy`
+  supplied via `AUTH_PROVIDER` — the default `AUTH_MODE=api_key` only attaches this server's own
+  outbound Imperva credentials, it never verifies who's calling. This is a deliberate fail-closed
+  default, added after a responsibly-disclosed report that earlier versions started with no
+  inbound authentication at all (see `SECURITY.md`). To explicitly accept that risk instead (not
+  recommended), set `ALLOW_UNAUTHENTICATED_HTTP=true`.
+- **Breaking change for existing `STDIO=false` deployments:** the HTTP bind address now defaults
+  to `HTTP_HOST=127.0.0.1` instead of `0.0.0.0`. If you're running this behind Docker's `-p`
+  port publishing or a Kubernetes Service, you must explicitly set `HTTP_HOST=0.0.0.0` —
+  container/pod port-forwarding reaches the container's real network interface, not loopback, so
+  the previous all-interfaces behavior needs to be requested explicitly rather than assumed. The
+  same applies to the Prometheus metrics port (`PROMETHEUS_CLIENT_ENABLED=true`).
+
 ## Troubleshooting
 
 ### Server Not Appearing
