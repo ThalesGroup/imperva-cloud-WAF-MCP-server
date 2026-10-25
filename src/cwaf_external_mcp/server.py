@@ -82,7 +82,11 @@ async def get_rules_of_account_tool(
         rate rules, security rules, forward rules, redirect rules, rewrite rules
 
     Parameters:
-        account_id (int): Unique identifier of the sub-account, if the account in context is the main account associated to the used API_ID this field MUST be empty (Optional)
+        account_id (int): Unique identifier of the account to fetch rules for. Unlike the other tools in this server,
+                this endpoint requires account_id to be passed explicitly, even when the account in context is the
+                main account associated with the used API_ID. Leaving it empty/null for the main account causes a
+                server error (e.g. ERROR_3015 / HTTP 500) on this endpoint specifically; always resolve and pass the
+                numeric account_id. (Optional in schema, but effectively required in practice)
         site_ids (list of numbers): list of sites IDs, only rules assigned to sites with those IDs will retrieve, if it exists (Optional)
         rules_ids (list of numbers): list of rules IDs, only rules with those IDs will retrieve, if it exists (Optional)
         sub_accounts_ids (list of numbers): list of subaccounts IDs, only rules assigned to sites under those subaccounts will retrieve, if it exists. (Optional)
