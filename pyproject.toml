@@ -8,14 +8,14 @@ authors = [
 ]
 requires-python = ">=3.13"
 dependencies = [
-    "aiohttp>=3.13.4",
+    "aiohttp>=3.14.4",
     "authlib>=1.6.11",
     "cryptography>=46.0.7",
     "pydantic<2.12,>=2.0",
     "ddtrace>=3.10.1,<4.0",
     "debugpy>=1.8.14",
     "fastapi>=0.115.14",
-    "fastmcp>=3.2.0",
+    "fastmcp>=3.4.10",
     "httpx>=0.28.1",
     "logging>=0.4.9.6",
     "prometheus-client>=0.22.1",
@@ -48,8 +48,8 @@ include = ["environment*","cwaf_external_mcp*"]
 [dependency-groups]
 dev = [
     "anyio>=4.9.0",
-    "black>=26.3.1",
-    "filelock>=3.20.3",
+    "black>=26.10.1",
+    "filelock>=4.2.1",
     "isort>=6.0.1",
     "jwcrypto>=1.5.6",
     "pre-commit>=4.5.1",
@@ -57,7 +57,7 @@ dev = [
     "pylint>=3.3.7",
     "python-minifier>=3.1.1",
     "ruff>=0.14.10",
-    "virtualenv>=20.36.1",
+    "virtualenv>=21.14.9",
 ]
 
 test = [
